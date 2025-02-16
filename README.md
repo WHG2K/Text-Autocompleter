@@ -42,13 +42,13 @@ python toy_example.py --completion_length short
 ```
 
 ### 2. **Run the experiment**:
-To run the experiment, use the `main.py` file by specifying the number of batches with the `--n_batches` argument
+The dataset used for the main experiment is [https://huggingface.co/datasets/RealTimeData/bbc_news_alltime](https://huggingface.co/datasets/RealTimeData/bbc_news_alltime). To run the experiment, use the `main.py` file by specifying the number of batches with the `--n_batches` argument (optional, default is 1).
 ```bash
 python main.py --n_batches <number_of_batches>
 ```
 Each batch contains:
 - **3 historical documents** and **1 test document**.
-- The experiment tests **four variables**:
+- The experiment tests four variables:
   - **Context length**: "no", "short", "medium", or "long"
   - **Cursor position**: "sentence_middle" or "sentence_end"
   - **Completion length**: "short", "medium", or "long"
