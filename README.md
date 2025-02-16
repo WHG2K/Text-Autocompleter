@@ -1,13 +1,7 @@
 # Text-Autocompleter
 
 ## Overview
-`Text-Autocompleter` is a toy implementation of a text autocompletion module designed to generate personalized text completions based on the user's existing documents and cursor position. The system utilizes Hugging Face's Mistral-7B-Instruct-v0.2 model for text generation and can provide completions with different lengths and contextual settings.
-
-## Features
-- **Text completion**: Generate text completions based on text before and after the cursor.
-- **Historical context**: Optionally incorporate historical documents for personalized completions.
-- **Flexible context and completion lengths**: Supports short, medium, and long completion lengths.
-- **Cursor position handling**: Allows splitting text based on cursor positions (e.g., sentence middle or sentence end).
+`Text-Autocompleter` is a toy implementation of a text autocompletion module designed to generate personalized text completions based on the user's existing documents and cursor position. The system utilizes Hugging Face's Mistral-7B-Instruct-v0.2 model.
 
 ## Project Structure
 - `src/`: Contains the main implementation files.
@@ -22,10 +16,19 @@
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/text-autocompleter.git
-   cd text-autocompleter
+   git clone https://github.com/WHG2K/Text-Autocompleter
+   cd Text-Autocompleter
+   ```
 
+2. **Install required dependencies**
+    ```bash
+   pip install -r requirements.txt
+   ```
 
+3. **Load the environment variables**: since the project uses the Hugging Face API, you need to set the `HF_API_TOKEN` environment variable to be your own Hugging Face API token. Create a `.env` file in the root directory and add your Hugging Face API token:
+    ```bash
+    HF_API_TOKEN=<your_hugging_face_api_token>
+    ```
 
 # 文本补全系统评测框架
 
