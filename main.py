@@ -2,6 +2,7 @@ import csv
 from src.text_completer import TextCompleter
 from dotenv import load_dotenv
 import os
+import argparse
 from src.text_processors import get_test_batch, get_context_samples, split_by_cursor_position
 
 def run_experiments(n_batches: int = 1):
@@ -73,4 +74,10 @@ def run_experiments(n_batches: int = 1):
                             print("-" * 80)
 
 if __name__ == "__main__":
-    run_experiments() 
+    # Set up command line argument parser
+    parser = argparse.ArgumentParser(description='Run text completion experiments')
+    parser.add_argument('--n_batches', type=int, default=1,
+                      help='Number of batches to run (default: 1)')
+    
+    args = parser.parse_args()
+    run_experiments(n_batches=args.n_batches)
