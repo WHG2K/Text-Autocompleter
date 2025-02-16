@@ -1,3 +1,32 @@
+# Text-Autocompleter
+
+## Overview
+`Text-Autocompleter` is a toy implementation of a text autocompletion module designed to generate personalized text completions based on the user's existing documents and cursor position. The system utilizes Hugging Face's Mistral-7B-Instruct-v0.2 model for text generation and can provide completions with different lengths and contextual settings.
+
+## Features
+- **Text completion**: Generate text completions based on text before and after the cursor.
+- **Historical context**: Optionally incorporate historical documents for personalized completions.
+- **Flexible context and completion lengths**: Supports short, medium, and long completion lengths.
+- **Cursor position handling**: Allows splitting text based on cursor positions (e.g., sentence middle or sentence end).
+
+## Project Structure
+- `src/`: Contains the main implementation files.
+  - `text_completer.py`: The core module for text completion using the Hugging Face API.
+  - `text_processors.py`: Utility functions for processing text, including splitting paragraphs and generating context samples.
+- `main.py`: Runs the experiment to test different configurations of text completion.
+- `toy_example.py`: A simple example to demonstrate text completion with historical documents.
+- `requirements.txt`: Lists the required dependencies for the project.
+- `setup.py`: Installs the required dependencies.
+
+## Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/text-autocompleter.git
+   cd text-autocompleter
+
+
+
 # 文本补全系统评测框架
 
 本项目旨在构建一个全面的文本补全系统评测框架，通过多维度的测试场景来评估系统性能。
