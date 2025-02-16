@@ -60,4 +60,4 @@ The `--n_batches` argument controls how many batches to run, allowing you to sca
 
 ## Detailed Implementation
 
-Please refer to `report.md` for detailed implementation.
+For detailed implementation, please refer to `report_CN.md` for Chinese version, or `report_EN.md` for English version.

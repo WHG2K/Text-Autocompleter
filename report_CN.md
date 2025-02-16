@@ -46,7 +46,7 @@
 
 ### 3.3 文本生成的问题
 
-目前，我们通过预设参数来控制生成文本的长度，但这种方法有时会导致生成不完整的句子，特别是在“long”情形下。为了解决这个问题，我们可以引入[stopping_criteria](https://huggingface.co/docs/transformers.js/v3.0.0/en/api/generation/stopping_criteria) 来更好地控制文本生成的结束条件。通过设置如生成完整句子、达到字符限制等条件，模型可以在语法和语义上生成更完整的文本。
+目前，我们通过预设参数来控制生成文本的长度，但这种方法有时会导致生成不完整的句子，特别是在“long”情形下。为了解决这个问题，我们可以引入[stopping_criteria](https://huggingface.co/docs/transformers.js/v3.0.0/en/api/generation/stopping_criteria)来更好地控制文本生成的结束条件。
 
 ### 3.4 测试数据的选取
 
