@@ -17,7 +17,7 @@ def run_experiments(n_batches: int = 1):
     # Open CSV file to write results
     with open('experiments.csv', mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(["BATCH", "CONTEXT LENGTH", "CURSOR POSITION", "COMPLETION LENGTH", "WITH HISTORY", "BEFORE CURSOR", "AFTER CURSOR", "GENERATED TEXT", "HIDDEN ORIGINAL"])
+        writer.writerow(["BATCH", "CONTEXT LENGTH", "CURSOR POSITION", "COMPLETION LENGTH", "WITH HISTORY", "BEFORE CURSOR", "AFTER CURSOR", "GENERATED TEXT", "HIDDEN MASKET TEXT"])
         
         # Perform two batch tests
         for batch in range(n_batches):

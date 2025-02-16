@@ -10,7 +10,6 @@
 - `main.py`: Runs the experiment to test different configurations of text completion.
 - `toy_example.py`: A simple example to demonstrate text completion with historical documents.
 - `requirements.txt`: Lists the required dependencies for the project.
-- `setup.py`: Installs the required dependencies.
 
 ## Installation
 
@@ -30,49 +29,31 @@
     HF_API_TOKEN=<your_hugging_face_api_token>
     ```
 
-# 文本补全系统评测框架
+## Usage
 
-本项目旨在构建一个全面的文本补全系统评测框架，通过多维度的测试场景来评估系统性能。
+### 1. **Run the toy example**:
+To see a quick demonstration of text completion, use the `toy_example.py`:
+```bash
+python toy_example.py
+```
+You can modify the --completion_length argument to test different completion lengths (`short`, `medium`, or `long`). The default value is `medium`. For example, to test the short completion length, use:
+```bash
+python toy_example.py --completion_length short
+```
 
-## 核心评测场景
+### 2. **Run the experiment**:
+To run the experiment, use the `main.py` file by specifying the number of batches with the `--n_batches` argument
+```bash
+python main.py --n_batches <number_of_batches>
+```
+Each batch contains:
+- **3 historical documents** and **1 test document**.
+- The experiment tests **four variables**:
+  - **Context length**: "no", "short", "medium", or "long"
+  - **Cursor position**: "sentence_middle" or "sentence_end"
+  - **Completion length**: "short", "medium", or "long"
+  - **Use of historical documents**: whether to include the historical documents in the context
 
-评测场景分为 5 大类，每类包含多个细分场景，以确保测试的全面性：
+Therefore, for each batch, the experiment will run **48 API calls** (4 context lengths * 2 cursor positions * 3 completion lengths * 2 historical document usage options).
 
-### 1. 文本类型（内容领域）
-- 新闻（BBC News）
-- 学术论文（待添加）
-- 小说/文学（待添加）
-
-**评测目标**：验证系统在不同语言风格和写作需求下的适应能力
-
-### 2. 光标位置
-- 句中插入
-- 句尾补全
-- 段落中间补全
-- 段落结尾补全
-
-**评测目标**：
-- 测试句子级和段落级的补全能力
-- 验证补全内容的上下文连贯性
-
-### 3. 上下文长度
-- 短上下文（<50 tokens）
-- 中等上下文（50-200 tokens）
-- 长上下文（>500 tokens）
-
-**评测目标**：
-- 验证不同长度上下文下的理解能力
-- 测试信息利用的充分性
-
-### 4. 补全长度
-- 短补全（1-2词）(方法：限制max_new_tokens=5, 并且遇到任何标点时停止)
-- 中等补全（1句）(方法：限制max_new_tokens=20, min_new_tokens=5, 并且遇到句号时停止)
-- 长补全（1段）(方法：限制max_new_tokens=50, min_new_tokens=20) 可以设置stopingcritaria使其不要生成下一段，但是暂时还没有实现这一功能。
-
-**评测目标**：
-- 确保各种长度补全的合理性
-- 验证长文本补全的连贯性
-
-### 5. 额外信息利用
-- 无额外资料
-- 有历史文档参考
+The `--n_batches` argument controls how many batches to run, allowing you to scale up the experiment. The `experiments_0.csv` is the result of the experiment under `n_batches=20`, which corresponds to **960 entries** (20 batches * 48 API calls per batch).
