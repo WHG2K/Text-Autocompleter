@@ -1,104 +1,53 @@
-# Personalized Text Autocompletion System
+# 项目报告：个性化文本补全功能设计与实现
 
-## 1. Introduction
+## 1. 项目概述
 
-The task at hand is to design and implement a personalized text autocompletion system that assists users in their writing by suggesting text completions based on the current editing context and cursor position. The system is intended to enhance writing efficiency by providing intelligent, context-sensitive suggestions, similar to tools like Cursor and Copilot, but focused on pure text (rather than code).
+当前，许多文本编辑器和编程工具（如Cursor、Copilot等）已开始使用自动补全技术，特别是在代码补全领域，已经取得了显著的成果。本项目专注于纯文本补全，旨在为用户提供一个文本自动补全功能。当用户在编辑文本时，系统将根据当前编辑区和光标位置，自动补全光标后的个性化内容，从而帮助用户提升写作效率。我们采用预训练语言模型，并结合光标位置、上下文长度、历史文档等因素，个性化地生成补全内容。通过该项目，用户将在编辑文本时，获得基于其写作风格和当前文本内容的智能补全，提升写作的连贯性和个性化体验。
 
-### 1.1 Project Scope
+为了实现该任务，我们利用了一个预训练模型来生成文本补全。基于该模型，我们通过构建一些特殊处理的提示语以指导模型生成与当前上下文以及历史文档相符的补全内容。为了评估我们实现的效果，我们使用了公开的新闻数据集[bbc_news_alltime](https://huggingface.co/datasets/RealTimeData/bbc_news_alltime)作为评测数据。该数据集为我们提供了丰富的文本资源，适合构建与写作场景相关的评测数据。在实验中，我们考虑了多个因素来个性化生成文本补全，例如光标位置（光标是否处于句子中间或句末）、上下文长度（不同长度的前后文对补全的影响）、补全长度（希望生成多长的补全）以及是否使用历史文档，以尽可能全面地测评文本生成的质量。
 
-The system should:
-- Automatically generate personalized text completions based on the user’s current position in a text.
-- Consider various writing contexts such as:
-  - Cursor position: whether the cursor is in the middle of a sentence or at its end.
-  - Context length: how much of the preceding text is used to generate completions.
-  - Completion length: how long the generated text should be.
-  - Historical documents: the system can leverage past written documents to personalize suggestions.
-  
-### 1.2 Task Objective
+## 2. 详细实现报告
 
-The objective is to create a system that intelligently predicts what a user is most likely to write next based on the immediate context, past writing history, and predefined configurations.
+### 2.1 模型选择与提示语构建
+在本项目中，我们选择了预训练模型[Mistral-7B-Instruct-v0.2](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2)来进行文本补全。在进行模型选择时，我们对比了多个模型，如[distilgpt2](https://huggingface.co/distilbert/distilgpt2)等，最终决定使用Mistral-7B-Instruct-v0.2。选择该模型的原因主要是其能够处理较长的输入文本（约32k个tokens），这对于需要输入大量历史文本的场景非常适用。此外，Mistral-7B的API稳定，性能可靠，适合实际应用。
 
----
+在提示语构建方面，目前并未找到可以精准指定上下文输入的现成模型，因此我们采用了一种简单的堆叠方法，即依次将历史文档、后文、前文进行拼接，作为输入文本。我们将当前文放在最后，目的是希望生成的内容能直接衔接到当前文本的结尾，从而使补全内容更加连贯自然。
 
-## 2. System Design
+这种方法简单易行，并且任何支持文本生成的模型都能够有效利用。但是，一个显然的缺点是后文变成了前文的部分。更好的方案是对模型进行微调，并设计专门针对上下文的提示语结构，以使模型更加精准地理解和生成上下文相关的内容。不过，鉴于本项目的时间限制和资源约束，我们选择了直接调用预训练模型并使用简化的提示语构建方式。这使得我们能够集中精力实现文本补全功能的核心效果，而不需要深入进行模型训练和优化。
 
-### 2.1 Approach and Methodology
+此外，在实际应用中，由于历史文档数量的不确定性，我们不能保证总输入长度始终小于模型的最大输入限制。我们的处理方式是，当历史文档、后文和前文分别超出这个限制时（目前设置为8000个token），我们对它们分别采取截断处理。具体来说，对于历史文档和后文，我们保留其靠前的部分；而对于前文，我们则保留靠后的部分。这样的处理方式能够确保我们尽可能保留与当前光标位置最接近的文本内容，从而提高补全的相关性和自然度。
 
-The core idea is to use a pre-trained language model to generate text completions based on the current position in the document, along with historical context. This project follows a modular design, where different aspects of the system (e.g., context length, cursor position, historical documents) are handled as configurable parameters to allow flexibility.
+最后，我们为模型设置了不同的参数，以生成不同长度的补全内容。具体来说，我们为模型设置了不同的`max_new_tokens`、`min_new_tokens`、`stop`和`length_penalty`参数，分别在`completion_length`为`short`、`medium`和`long`时设置为不同的值。
 
-#### 2.1.1 Pre-trained Model Selection
+调用模型的部分详见`src/text_completer.py`中`TextCompleter`类的`_call_generator_api`方法。构建提示语的部分详见`src/text_completer.py`中`TextCompleter`类的`_build_prompt`和`complete_text` 方法。关于不同长度补全的参数，详见`src/text_completer.py`中`TextCompleter`类`complete_text` 方法的`completion_length`参数。如果想要体验效果，可以运行`toy_example.py`文件。
 
-The system uses a large pre-trained language model like Mistral-7B-Instruct-v0.2 from Hugging Face, which is fine-tuned for text generation tasks. This model is chosen for its high quality in understanding and generating coherent text sequences.
+### 2.2 评测数据处理
+我们对评测实验使用的数据集 [https://huggingface.co/datasets/RealTimeData/bbc_news_alltime](https://huggingface.co/datasets/RealTimeData/bbc_news_alltime)进行分批次处理。每个批次包含：3篇历史文档和1篇测试文档。该数据集的特殊性在于每篇新闻包含多个段落，并且每段的长度不是很长，因此我们具体做如下处理：
 
-#### 2.1.2 Data Input
+对于前后文长度`context_length`的处理，当`context_length`为 "no" 时，我们随机选取其中连续的2段；当`context_length`为 "short" 时，随机选取其中的4段；当`context_length`为 "medium" 时，选取8段；当`context_length`为 "long" 时，则选取全文。对于光标位置`cursor_position`的处理，如果选择的后文有$m$段，我们将大于$(m // 2) + 1$段的内容作为后文。如果光标位置是 "sentence_middle"，我们会随机选取第$(m // 2)$段中非句末的一个位置，并将其及之前的文本作为前文。如果光标位置是 "sentence_end"，我们会随机选取第$(m // 2)$ 段中的某个句点，并将其及之前的文本作为前文。注意到我们允许前文不以完整的单词结尾。例如，如果前文是"I enjoy pl"，我们可能期望其生成"aying games"，从而组成完整的句子"I enjoy playing games"，以同时测试其单词补全的子功能。
 
-The input to the model is a combination of:
-- The text preceding the cursor position (context).
-- The cursor position (e.g., middle of the sentence or at the end).
-- Historical documents (optional) to further personalize completions.
+对前后文长度的处理详见`src/text_processors.py`中的`get_context_samples`函数。对光标位置的处理详见`src/text_processors.py`中的`split_by_cursor_position`函数。历史文档则作为参数`history_docs`传入到`src/text_completer.py`中`TextCompleter`类的`complete_text` 方法中，如果其为`None`或空列表则表明不使用历史文档。
 
----
+## 3. 可改进之处
 
-## 3. Evaluation Design
+由于时间、计算资源和本人目前知识的限制，这一项目目前只是一个非常简单的实践。在实施过程中，我们着重于快速实现一个基本的文本补全系统，使用预训练模型进行文本生成，并通过简单的上下文处理来满足不同场景需求。然而，这一实现仍然存在许多可以进一步改进和优化的空间。除了选取更先进的语言模型，以下是一些潜在的改进方向，供后续探索：
 
-### 3.1 Dataset
+### 3.1 对大量历史文档的筛选
 
-The dataset used for evaluation is the BBC News dataset from Hugging Face, specifically `RealTimeData/bbc_news_alltime`. This dataset contains articles from BBC News, making it a good source of diverse, real-world text.
+由于历史文档的数量可能非常庞大，盲目地截断会导致部分关键信息丢失，从而影响生成的文本质量。为了解决这个问题，我们可以引入一些筛选机制，来选择与当前文本更相关的历史文档作为参考。具体来说，我们可以使用一些文本相似度度量方法来衡量当前文本与历史文档之间的关联度，优先选择那些与当前编辑区域最为相关的历史文档进行处理。
 
-- [Dataset Link on Hugging Face](https://huggingface.co/datasets/RealTimeData/bbc_news_alltime)
+另一种改进方法是引入一个独立的专门用于摘要生成的模型，例如[BART](https://huggingface.co/facebook/bart-large-cnn)。通过这个模型，我们可以将长篇的历史文档精简为较短的摘要，保留其中最重要的部分，从而减少输入文本的长度，同时确保历史文档中的关键信息能够被有效传递给生成模型。这不仅可以避免长文档带来的截断问题，还能够使生成模型在处理时更加专注于最相关的信息，提升生成的个性化和连贯性。
 
-This dataset will be used to test the autocompletion system by simulating different writing scenarios.
+这些处理方法可以帮助生成模型更全面地考虑到历史文档中的相关信息，并且避免因信息过载而导致的性能下降。通过选择更合适的历史文档和摘要生成，或许可以进一步提高模型的生成质量。
 
-### 3.2 Experiment Setup
+### 3.2 提示词的构建
 
-The evaluation involves testing the system under different conditions, which include:
-- **Cursor position**: Testing both "sentence_middle" and "sentence_end" positions.
-- **Context length**: Evaluating short, medium, and long context lengths.
-- **Completion length**: Generating completions with varying lengths—short, medium, and long.
-- **Use of historical documents**: Whether or not to use historical documents in the generation process.
+目前我们处理历史文档和前后文的方法是通过简单的堆叠，将历史文档、前文和后文合并成一个统一的输入传递给模型。这种做法虽然可以解决基本的上下文问题，但并没有充分利用每个部分的特性，可能导致模型在生成时忽略了各部分内容的不同角色和重要性。例如，历史文档的作用是为当前文本提供背景和参考，而前文则是直接影响生成内容的上下文信息，后文则需要根据光标位置来决定生成的方向和内容。
 
-Each test case simulates a scenario where the system generates completions for a batch of text, where each batch consists of 3 historical documents and 1 document to test. Given the 4 conditions (context length, cursor position, completion length, historical documents), each batch will involve 48 test cases (4*2*3*2=48).
+为了改进这一点，可以通过微调模型，并引入特定的提示语来明确区分各部分的角色。在微调过程中，我们可以设计一个任务，让模型学习如何处理和区分历史文档、前文和后文。例如，我们可以在历史文档部分加入提示词，如“[HISTORY]”，在前文和后文分别加入“[PREVIOUS]”和“[NEXT]”等标签。这些特殊提示词将帮助模型识别各部分内容的不同作用，从而在生成时根据其角色加以区分和优化。通过这种方式，模型可以更好地理解哪些内容是历史信息，哪些是直接影响当前文本的上下文，进而生成更符合逻辑和连贯性的文本。
 
-### 3.3 Result Generation
+### 3.3 文本生成的问题
 
-The experiments will generate results in a CSV file (e.g., `experiments.csv`), which will contain the results for all test cases. For the chosen evaluation parameters (`n_batches=20`), the experiment will generate 20 batches of 48 cases each, totaling 960 results.
+目前，我们通过预设参数来控制生成文本的长度，但这种方法有时会导致生成不完整的句子，特别是在“long”情形下。为了解决这个问题，我们可以引入[stopping_criteria](https://huggingface.co/docs/transformers.js/v3.0.0/en/api/generation/stopping_criteria) 来更好地控制文本生成的结束条件。通过设置如生成完整句子、达到字符限制等条件，模型可以在语法和语义上生成更完整的文本。
 
----
 
-## 4. Evaluation Metrics
-
-The evaluation focuses on measuring:
-- **Accuracy**: How well the generated completions match what the user is likely to write.
-- **Coherence**: The generated text’s consistency with the surrounding text.
-- **Relevance**: How relevant the suggestions are to the current document and context.
-
-These metrics will be quantified based on human evaluations as well as automated text similarity measures.
-
----
-
-## 5. Implementation Details
-
-The implementation follows a modular approach, with distinct components for:
-1. **Text Input Handling**: Managing document input and cursor positions.
-2. **Text Generation**: Using the pre-trained model for generating text completions.
-3. **Evaluation and Results Logging**: Running experiments and saving the results.
-
-The system is designed to be easily configurable with respect to the different parameters such as context length, cursor position, and completion length.
-
----
-
-## 6. Future Work and Improvements
-
-### 6.1 Model Improvements
-
-While the current implementation uses a pre-trained model, there may be future work aimed at fine-tuning the model on more specific writing tasks to further improve its accuracy and relevance for text completions.
-
-### 6.2 User Interface
-
-An interactive interface for real-time text autocompletion could be developed in the future to allow users to experience the system more directly.
-
----
-
-## 7. Conclusion
-
-This report outlines the design and implementation of a personalized text autocompletion system that aids users in writing by generating relevant and coherent completions based on their immediate context and past writing history. The system was evaluated using a news dataset and tested across a range of scenarios, with future work directed at further improving the model and user experience.
