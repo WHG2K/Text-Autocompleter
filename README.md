@@ -49,10 +49,10 @@ python main.py --n_batches <number_of_batches>
 Each batch contains:
 - **3 historical documents** and **1 test document**.
 - The experiment tests four variables:
-  - **context_length**: the length of the context ("no", "short", "medium", or "long").
-  - **cursor_position**: the position of the cursor within the document ("sentence_middle" meaning the middle of the sentence, or "sentence_end" meaning the end of the sentence).
-  - **completion_length**: the length of the desired text completion length ("short", "medium", or "long").
-  - **use_history**: whether to include the historical documents in the context (True or False).
+  - `context_length`: the length of the context ("no", "short", "medium", or "long").
+  - `cursor_position`: the position of the cursor within the document ("sentence_middle" meaning the middle of the sentence, or "sentence_end" meaning the end of the sentence).
+  - `completion_length`: the length of the desired text completion length ("short", "medium", or "long").
+  - `use_history`: whether to include the historical documents in the context (True or False).
 
 Therefore, for each batch, the experiment will run **48 API calls** (4 context lengths * 2 cursor positions * 3 completion lengths * 2 historical document usage options).
 
