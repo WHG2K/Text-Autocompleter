@@ -57,3 +57,7 @@ Each batch contains:
 Therefore, for each batch, the experiment will run **48 API calls** (4 context lengths * 2 cursor positions * 3 completion lengths * 2 historical document usage options).
 
 The `--n_batches` argument controls how many batches to run, allowing you to scale up the experiment. The `experiments_0.csv` is the result of the experiment under `n_batches=20`, which corresponds to **960 entries** (20 batches * 48 API calls per batch).
+
+## Detailed Implementation
+
+Please refer to the `report.md` file for detailed implementation.
